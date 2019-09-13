@@ -12,6 +12,8 @@ function signup(){
  localStorage.setItem(firstName+'email', email);
  localStorage.setItem(firstName+'password', password);
  var host= window.location.pathname;
-    host =host.replace('signup','signin');
-    window.location = host;
+host =host.replace('signin','signup');
+window.location = host;
+window.alert('Sucessful! Please Sign In');
+    
 }

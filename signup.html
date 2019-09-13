@@ -27,7 +27,7 @@
         </div>
         <!-- Signup Form -->
         <div class="form">
-            <form action="" class="signup">
+            <form action="signin.html" class="signup" onsubmit="signup()">
                 <div class="form-group">
                     <label for="firstName" class="label">First Name </label><br>
                     <input type="text" id="firstName" class="form-control" required>
@@ -51,12 +51,12 @@
                 <p class="text-primary" id="agree_info">You agree to the LinkedIn User Agreement, Privacy Policy, and
                     Cookie Policy.</p>
 
-                <button type="submit" class="btn btn-primary btn-block" onclick="signup()" id="submit_btn">Agree &
+                <button type="submit" class="btn btn-primary btn-block"  id="submit_btn">Agree &
                     Join</button>
 
                 <button type="button" class="btn btn-primary btn-block" id="submit_btn">Continue with Facebook</button>
 
-                <p class="text" id="agree_info">Already in LinkedIn? <a href="#">Sign in</a></p>
+                <p class="text" id="agree_info">Already in LinkedIn? <a href="signin.html">Sign in</a></p>
 
             </form>
 
