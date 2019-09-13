@@ -1,0 +1,38 @@
+
+header {
+    text-align: center;
+}
+
+main{
+    text-align: center;
+}
+h1 {
+   
+    
+}
+
+#signinlogo{
+    margin-top: 2%;
+    height: 8%;
+    width: 8%;
+}
+
+h2{ font-size: 16px;
+    
+}
+
+.login{
+    margin-left: 40%;
+    width: 20%;
+}
+
+
+.footNav ul,li{
+    display: inline;
+    text-align: center;
+
+}
+
+.login input{
+    border-radius: 2%;
+}
