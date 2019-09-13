@@ -1,0 +1,55 @@
+.mainNav{
+    position: relative;
+    width: 100%;
+    max-width: calc(1128px + (16px * 2));
+    padding-left: 16px;
+    padding-right: 16px;
+    margin: auto;
+}
+.logo{
+    position: absolute;
+    left: 228px;
+    width: 122px;
+    height: 55px;
+    top: -2px;
+}
+.signIn{
+
+   float: right;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #0073b1;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1.6rem;
+    font-weight: 600;
+    
+    height: 32px;
+    line-height: 32px;
+    overflow: hidden;
+    outline-width: 2px;
+    padding: 0 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    margin-right: 24px;
+    margin-top: 10px;
+
+}
+.joinNow{
+    float: right;
+    padding: 0 16px;
+    height: 32px;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+.homePage{
+    height: 240px;
+    width: 400px;
+    position: absolute;
+    bottom: calc(-64px);
+    left: 0;
+}
+.form-control {width:190px;}
+.popover {max-width:280px;}
