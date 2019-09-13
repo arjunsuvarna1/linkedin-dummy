@@ -8,7 +8,7 @@ main{
 }
 h1 {
    
-    
+    font-size: 24px;
 }
 
 #signinlogo{
@@ -28,11 +28,26 @@ h2{ font-size: 16px;
 
 
 .footNav ul,li{
-    display: inline;
-    text-align: center;
-
+    margin-left: 6%; 
+    display:inline;
+    font-size: 12px;
 }
+
+footer{
+    margin-top:8%;
+}
+
 
 .login input{
     border-radius: 2%;
+    border-color: black;
+    height:40px;
+}
+.login button{
+    width: 100%;
+    
+    border-radius: 2%; 
+}
+.login ::placeholder{
+    color: black;
 }
