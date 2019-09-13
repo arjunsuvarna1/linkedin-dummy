@@ -9,12 +9,30 @@
   <link rel="stylesheet" href="styles/index.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+    integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+  $(document).ready(function() {
+  $("[data-toggle=popover]").popover({
+    trigger: 'click',
+    placement: "bottom",
+    html: true,
+    content: function() {
+      var anchorText = $(this).text();
+      $('#popover-content').find('input[id=txtContent]').attr('value', anchorText);
+      return $('#popover-content').html();
+    }
+  });
+});
+  </script>
 
-  <script src="scripts/index.js"></script>
 </head>
 
 <body>
@@ -24,17 +42,35 @@
     <button onclick="" class="signIn">Sign in</button>
     <button onclick="" class="joinNow">Join Now</button>
 
-   
+
 
   </header>
   <main>
-    
-      <h3 class="fonth3">Welcome to your<br> professional<br> community</h3>
-    
 
-    <button class="search"  class="fas fa-cloud"></i>Find jobs, people, and more</button>
+    <h3 class="fonth3">Welcome to your<br> professional<br> community</h3>
+
+
+    <button class="search"><i class="fas fa-search"></i> Find jobs, people, and more</button>
     <img src="images/homePage.svg" class="homePage">
+
+
+
+    
   </main>
+  <div id="popover-content" class="hide">
+      <div class="form-group">
+        <input class="form-control" id="txtContent" type="text" />
+        <button id="btnOk" type="button" class="btn btn-default">
+          <span class="glyphicon glyphicon-ok"></span>&nbsp;
+        </button>
+        <button id="btnCancel" type="button" class="btn btn-default">
+          <span class="glyphicon glyphicon-remove"></span>&nbsp;
+        </button>
+      </div>
+    </div>
+    <a href='#' class='btn-link' data-html='true' data-toggle='popover'>Sample text</a>
+    <script>
+    </script>
 </body>
 <footer>
 
