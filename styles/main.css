@@ -1,10 +1,26 @@
 /* Deepraj */
 /* signup page */
 
-/* linked logo */
 
-div #image{
-    width : 50px;
-    height : 30px;
-    margin : 0 auto;
+body{
+    background-color :#a2cadd;
+}
+
+/* signup form css */
+.signup{
+    background-color:rgb(238, 235, 235);
+}
+
+/* linked logo */
+.image img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width : 30%;
+    
+  }
+
+div #signup_text{
+    text-align: center;
+    color : white;
 }
