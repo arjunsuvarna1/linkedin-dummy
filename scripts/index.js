@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function() {                    //popover jquery to be properly implemented 
   $("[data-toggle=popover]").popover({
     trigger: 'click',
     placement: "bottom",

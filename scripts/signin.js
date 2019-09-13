@@ -1,7 +1,6 @@
 /*Sign in functionality */
 function signin(){
-    var host= window.location.pathname;
-    host =host.replace('signin','home');
+    
     var serial = localStorage.getItem('serial');
     var firstName =   document.getElementById('firstName').value;
     var email =  document.getElementById('email').value;
@@ -10,7 +9,9 @@ function signin(){
         sessionStorage.setItem('name',firstName);
         sessionStorage.setItem('serial',serial);
         
-            window.location =  host;
+        var host= window.location.pathname;
+        host =host.replace('signin','home');
+            window.location =  host;                        //redirect to home page
         
     }
     else{
