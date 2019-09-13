@@ -1,0 +1,259 @@
+define("feed-detail-common/routes/application",["exports","feed-shared/utils/authenticated-member-actor","data-layer/utils/organization/company-coerce","feed-shared/utils/gdpr","feed-shared/utils/util","data-layer/utils/feed/member-actor","global-utils/utils/get-app-config","global-utils/utils/urn-converter","feed-shared/utils/constants"],function(e,t,a,i,s,n,r,o,l){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var c=Ember.Route.extend({store:Ember.inject.service("store"),authenticatedUser:Ember.inject.service("authentication@authenticated-user"),feedActionEvent:Ember.inject.service("feed-shared@feed-action-event"),gdprNotice:Ember.inject.service("gdpr-notice@gdpr-notice"),jet:Ember.inject.service("jet"),i18n:Ember.inject.service("i18n"),lix:Ember.inject.service("lix"),queryParams:{actorCompanyId:{refreshModel:!0},commentUrn:{refreshModel:!1},replyUrn:{refreshModel:!1},likeFromLogin:{refreshModel:!1}},init:function(){this._super.apply(this,arguments)
+var e=this.get("lix")
+this.setProperties({useQueryURLSocialMismatch:e.getTreatmentIsEnabled(l.lixTestKeys.FEED_DETAIL_QUERY_URL)})},beforeModel:function(e){this._super.apply(this,arguments)
+var t=e.queryParams,a=t.commentUrn,i=t.replyUrn,s=t.anchor
+t.highlightedUpdateUrns&&this.replaceWithExternal("feed")
+s||!a&&!i||(e.queryParams.anchor="anchoredComment")
+return(0,n.populateMemberActor)(Ember.get(this,"authenticatedUser"))},model:function(e){var t=Ember.get(this,"feedActionEvent").getModuleKeyForCurrentPage(),a=-1!==Ember.get(this,"router.currentAnchorRoute.fullRouteName").indexOf("posts"),s=e.updateId,n=e.actorCompanyId,r=e.likeFromLogin,o=e.commentUrn,l=e.replyUrn,c=this._getAnchoredComment(o,l)
+r&&(0,i.showGdprLikeCreatedNotice)(Ember.get(this,"i18n"),Ember.get(this,"gdprNotice"))
+return Ember.RSVP.hash({update:this.fetchFeedUpdate(s,t,n,a),authenticatedActor:this.fetchAuthenticatedActorIfAdmin(n),anchoredComment:c})},_getAnchoredComment:function(e,t){var a=this,i=Ember.get(this,"store"),n="com.linkedin.voyager.feed.Comment"
+if(t&&e){var r=i.findRecord(n,t),o=i.findRecord(n,e)
+return Ember.RSVP.all([r,o]).then((function(t){var a=t[0],i=t[1]
+if(!a||Ember.get(a,"parentCommentUrn")===e){var s=Ember.get(i,"socialDetail.comments"),n=s.get("elements")
+n.length>0&&n.clear()
+n.pushObject(a)
+s.set("paging.count",0)
+a.set("isAnchored",!0)
+i.set("isParentOfAnchored",!0)
+return i}}))}return e?i.findRecord(n,e).then((function(e){if(!e||!Ember.get(e,"parentCommentUrn")){e.set("isAnchored",!0)
+return e}})).catch((function(e){if((0,s.isHttpErrorStatus)(e)){Ember.get(a,"jet").logError({message:"Network request failed while attempting retrieve anchored comment",errorObject:e},l.JET_TAGS.GET_ANCHORED_COMMENT,!1)
+return[]}throw e})):Ember.RSVP.Promise.resolve(void 0)},fetchPostsOrUpdateModel:function(e,t,a,i){var n=this,r=Ember.get(this,"store"),c=Ember.get(this,"useQueryURLSocialMismatch"),u="feed/updates|"+e+"|"+t+"|"+a,d={commentsCount:10,likesCount:10}
+t&&(d.moduleKey=t)
+a&&(d.organizationActor=(0,o.toUrn)("organization/company",a))
+if(i){d.q="postSlug"
+d.slug=e
+return r.queryURL("feed/updatesV2",{cacheKey:u,params:d,reload:c}).then((function(e){return Ember.get(e,"elements").objectAt(0)})).catch((function(e){if((0,s.isHttpErrorStatus)(e)){Ember.get(n,"jet").logError({message:"Network request failed while retrieving Feed update",errorObject:e},l.JET_TAGS.GET_UPDATE,!1)
+n.transitionToExternal("feed.error")}throw e}))}d.q="backendUrnOrNss"
+d.urnOrNss=e
+return r.queryURL("feed/updatesV2",{cacheKey:u,params:d,reload:c}).then((function(e){return e.get("elements.firstObject")}))},fetchAuthenticatedActorIfAdmin:function(e){var i=this,n=Ember.get(this,"store"),o=Ember.get(this,"authenticatedUser")
+if(!e)return(0,t.default)(n,o)
+var c={url:"/"+r.default.namespace+"/organization/companies/"+encodeURIComponent(e)}
+return n.findRecord("com.linkedin.voyager.deco.organization.web.WebFullCompanyMain",e,{adapterOptions:c}).then((function(e){return e&&Ember.get(e,"permissions.admin")?(0,a.getCompanyActorM3)(e,n):(0,t.default)(n,o)})).catch((function(e){if((0,s.isHttpErrorStatus)(e)){Ember.get(i,"jet").logError({message:"Network request failed while retrieving admin actor",errorObject:e},l.JET_TAGS.GET_ADMIN_ACTOR,!1)
+return(0,t.default)(n,o)}throw e}))},actions:{showReactorsList:function(e){this.transitionToExternal("feed.update.reactions",e)},showLikersList:function(e){this.transitionToExternal("feed.update.likes",e)}}})
+e.default=c})
+define("feed-detail-common/routes/feed-ca",["exports","me-ca-base/routes/application"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({parentPath:function(){return"index"},modalCloseTransitionMethod:"replaceWith"})
+e.default=a})
+define("feed-detail-common/routes/feed-ca/post-analytics",["exports","me-ca-base/routes/post-analytics"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({templateName:"feed-ca/content-analytics",model:function(e){for(var t=this.paramsFor("application"),a=arguments.length,i=new Array(a>1?a-1:0),s=1;s<a;s++)i[s-1]=arguments[s]
+return this._super.apply(this,[Ember.assign({contentUrn:t.updateId},e)].concat(i))}})
+e.default=a})
+define("feed-detail-common/routes/feed-ca/share-analytics",["exports","me-ca-base/routes/share-analytics"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({templateName:"feed-ca/content-analytics",model:function(e){for(var t=this.paramsFor("application"),a=arguments.length,i=new Array(a>1?a-1:0),s=1;s<a;s++)i[s-1]=arguments[s]
+return this._super.apply(this,[Ember.assign({contentUrn:t.updateId},e)].concat(i))}})
+e.default=a})
+define("feed-detail-common/routes/index",["exports","@babel/runtime/helpers/esm/objectSpread","shared/mixins/scrollable-targets-route"],function(e,t,a){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var i=Ember.Route.extend(a.default,{pageKey:"flagship3_detail_base",modal:Ember.inject.service("deprecated-modals@modal"),tracking:Ember.inject.service("tracking"),deactivate:function(){this.get("modal").close()},addComment:null,classNameBindings:["scrollToBottomOfComments"],init:function(){this._super.apply(this,arguments)
+this.setProperties({scrollTargets:{social:".feed-shared-update__social-detail-list"}})},beforeModel:function(e){var t=e.queryParams,a=t.addComment,i=t.originSubroute
+this._super.apply(this,arguments)
+this.setProperties({addComment:a,originSubroute:i})},setupController:function(e){this._super.apply(this,arguments)
+e.setProperties((0,t.default)({},this.getProperties(["addComment","originSubroute"])))},afterModel:function(e){if(e&&e.update){if("LIVE_VIDEO"===e.update.get("updateMetadata.detailPageType")){var t=e.update.get("updateMetadata.shareUrn")
+this.transitionToExternal("video-engine.live",t)}else{e.update.set("cachedCommentTotal",e.update.get("socialDetail.comments.elements.length"))
+this.get("tracking").firePageViewEvent(e.update.get("value.detailedPageKey")||"flagship3_feed_detail")}}}})
+e.default=i})
+define("feed-detail-common/routes/likes",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.Route.extend({pageKey:"flagship3_feed_detail_likes",feedActionEvent:Ember.inject.service("feed-shared@feed-action-event"),model:function(){return this.modelFor("application").update.get("socialDetail.likes")},afterModel:function(e){var t=this.modelFor("application").update.get("socialDetail.threadId")
+this.set("threadId",t)
+Ember.isEmpty(e.get("elements"))&&this.replaceWith("application",this.get("threadId"))},setupController:function(e){this._super.apply(this,arguments)
+e.set("threadId",this.get("threadId"))},actions:{onActorClick:function(e){var t,a=this.modelFor("application").update
+switch(e.get("actorType")){case"school":t="viewSchool"
+break
+case"company":t="viewCompany"
+break
+default:t="viewMember"}var i=a.get("updateMetadata")
+this.get("feedActionEvent").fireV2(i,{actionType:t,actionCategory:"VIEW",controlName:"like_actor"})}}})
+e.default=t})
+define("feed-detail-common/routes/redirect",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.Route.extend({redirectRoute:null,redirectParams:null,activate:function(){var e=this.redirectParams,t=this.redirectRoute,a=[]
+a.push(t||"feed.index")
+e&&a.push({queryParams:e})
+this.replaceWith.apply(this,a)}})
+e.default=t})
+define("feed-detail-common/routes/reshare",["exports","feed-detail-common/routes/redirect"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({redirectRoute:"index",redirectParams:{originSubroute:"reshare"}})
+e.default=a})
+define("me-ca-base/components/analytics-highlight",["exports","me-ca-base/mixins/impression-tracking","me-ca-base/templates/components/analytics-highlight"],function(e,t,a){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var i=/content-analytics\/analytics-highlights\//g,s={occupation:"ca-analytics-highlight__trophy",region:"ca-analytics-highlight__location-pin",source:"ca-analytics-highlight__radar"},n=Ember.Component.extend(t.default,{layout:a.default,classNames:["ca-analytics-highlight"],trackImpressions:!0,showInitialView:!0,tracking:Ember.inject.service("tracking"),init:function(){this._super.apply(this,arguments)
+var e=this.get("model.controlNameSuffix"),t=this._getExpandedHighlightArray()
+this.setProperties({expandedHighlightArray:t,type:this.get("model.componentType").replace(i,""),icon:s[e],controlName:"analytics_"+e+"_card",impressionEvent:{eventName:"SocialUpdateAnalyticsHighlightImpressionEvent",objectCollection:"analyticsHighlights",object:"analyticsHighlight"}})
+this.get("tracking").setupTrackableComponent(this)},actions:{toggleInitialView:function(){var e=this.get("showInitialView"),t=this.get("controlName"),a=e?"expand":"collapse"
+this.get("tracking").fireInteractionEvent(t+"_arrow_"+a)
+this.toggleProperty("showInitialView")}},_getExpandedHighlightArray:function(){return(this.get("model.companyHighlightInfos")||this.get("model.regionHighlightInfos")||this.get("model.occupationHighlightInfos")||this.get("model.referrerSources")).slice(1)}})
+e.default=n})
+define("me-ca-base/mixins/impression-tracking",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.Mixin.create({tracking:Ember.inject.service("tracking"),onImpression:function(e){if(this.element){var t,a=this.getImpressionTrackingInfo(e),i=this.get("tracking"),s=i.initTrackingEvent(a.eventName)
+s.setBody(((t={})[a.objectCollection]=[a.body],t))
+i.fireLowPriorityEvent(s)}},getImpressionTrackingInfo:function(e){var t,a=this.get("impressionEvent"),i=((t={})[a.object]={objectUrn:this.get("objectUrn"),trackingId:this.get("trackingId")},t.visibleTime=e.visibleTime,t.duration=e.duration,t.listPosition={index:this.get("index")+1},t.size={width:this.element.clientWidth,height:this.element.clientHeight},t)
+this.get("hasInsight")&&(i.insight={trackingId:this.get("insightTrackingId"),objectUrn:this.get("insightObjectUrn")})
+return Ember.assign({body:i},a)}})
+e.default=t})
+define("me-ca-base/routes/application",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=["profile-subroutes"],a=Ember.Route.extend({modal:Ember.inject.service("deprecated-modals@modal"),deactivate:function(){this.get("modal").close()},parentPath:function(){var e=this._router.currentPath
+e=e.replace(/.*authentication./,"")
+e=e.replace("."+this._router.currentRouteName,"")
+var a=t.find((function(t){return e.indexOf(t)>=0}))
+a&&(e=e.substr(e.lastIndexOf(a)))
+return e},modalCloseTransitionMethod:"replaceWithExternal",afterModel:function(e){Ember.set(e,"parentPath",this.parentPath.bind(this))
+Ember.set(e,"modalCloseTransitionMethod",this.modalCloseTransitionMethod)}})
+e.default=a})
+define("me-ca-base/routes/content-analytics",["exports","@babel/runtime/helpers/esm/toConsumableArray","me-ca-base/utils/get-update-urn","me-ca-base/utils/constants","data-layer/requests/feed/updates","social-details/utils/reaction-lixes","social-details-base/utils/get-reactions-total","me-ca-base/utils/supported-social-update-type"],function(e,t,a,i,s,n,r,o){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var l="header_title_video",c="header_title_image",u="header_title_post",d=Ember.Route.extend({pageKey:"flagship3_me_content_analytics",templateName:"content-analytics",formatter:Ember.inject.service("formatter"),lix:Ember.inject.service("lix"),store:Ember.inject.service("store"),tracking:Ember.inject.service("tracking"),_currentTab:"",init:function(){this._super.apply(this,arguments)
+var e=this.get("lix")
+Ember.setProperties(this,{enableReactions:(0,n.isReactionsEnabled)(e)})},model:function(e){var i=e.contentUrn,n=this.get("store"),r=(0,a.default)(i),o={q:"socialUpdateAnalytics",numHighlightInfos:9,urn:i},l="identity/socialUpdateAnalytics|"+o.q+"|"+o.numHighlightInfos+"|"+i,c=n.queryURL("identity/socialUpdateAnalytics",{cacheKey:l,params:o,reload:!0}),u=n.findRecord.apply(n,(0,t.default)((0,s.findRequestV2)(r,"feed-item:phone"))).then((function(e){return e.get("elements.firstObject")}))
+return c.then((function(e){var t="/voyager/api/identity/socialUpdateAnalyticsHeader/"+i,a=n.queryURL(t,{cacheKey:i,reload:!0})
+return Ember.RSVP.hash({header:a,update:u,urn:i}).then((function(t){return Ember.Object.create({header:t.header,modules:e.get("elements"),update:t.update,urn:t.urn})}))}))},afterModel:function(e,t){var a=Ember.get(e,"header.totalSocialActivityCounts.reactionTypeCounts"),s=(0,r.default)(a),n=s,d=n>0,m=s>0,h=Ember.get(e,"header.totalSocialActivityCounts.numComments")||0,p=h>0,g=Ember.get(e,"header.totalSocialActivityCounts.numShares")||0,f=e.get("header.socialUpdateType"),b=e.get("update.updateMetadata.shareAudience"),y=g>0&&(0,o.isSupportedSocialUpdateType)(f),_=y,v=e.get("urn")
+y&&this._getReshareFeed(v).then((function(t){e.set("reshares",t)}))
+var E=null,T=this._getCreatedDate(e),w=this._formatDate(T),I=this._getAnalyticsSections(e.get("modules")).socialGestureHighlights
+Ember.isPresent(I)&&"com.linkedin.voyager.identity.me.socialUpdateAnalytics.EmptyAnalyticsState"===Ember.get(I,"value.highlights.firstObject.value.$type")&&(E=Ember.get(I,"value.highlights.firstObject.value.title"))
+var S=Ember.isPresent(I)&&!E,A=this._getHasAnalyticsExpired(T),x=!A&&Ember.isPresent(I),P=u
+e.get("header.title")||(f===i.SOCIAL_UPDATE_TYPES.VIDEO?P=l:e.get("header.image.url")&&(P=c))
+var M=!x,N=Ember.get(e,"header.totalSocialActivityCounts.numViews")||0,R=d&&p,C="tooltip-"+Ember.guidFor(this)
+e.setProperties({createdDate:w,emptyAnalyticsExpirationMessage:E,enableReactions:Ember.get(this,"enableReactions"),hasAnalytics:x,hasAnalyticsExpired:A,hasNoAnalytics:M,headerTitleTemplateKey:P,isShowTooltip:!1,numComments:h,numLikes:n,numReactions:s,numShares:g,numViews:N,reshareStart:10,shareType:f,shouldShowSocialGestureHighlights:S,showNumComments:p,showNumLikes:d,showNumReactions:m,showNumShares:_,showSocialCounts:R,socialGestureHighlights:I,tooltipId:C})
+"GROUP"!==b&&"CONNECTIONS"!==b||t.abort()},actions:{fireTabControlEvent:function(e){this.get("tracking").fireInteractionEvent("content_analytics_"+e+"_tab")},navigateToDetail:function(){var e=this.get("routeName"),t=this.modelFor(e).get("update.updateMetadata.urn")
+this.get("tracking").fireInteractionEvent("content_analytics_social_count")
+this.transitionToExternal("feed.update",t)},getReshares:function(e){var t=this.get("store"),a=this.get("routeName"),i=this.modelFor(a),s=i.get("urn"),n=e+10,r={start:e,q:"reshareFeed",targetUrn:s,count:10},o="feed/updates|"+r.q+"|"+r.count+"|"+r.start+"|"+s
+return t.queryURL("feed/updatesV2",{cacheKey:o,params:r,reload:!0}).then((function(e){i.get("reshares.elements").pushObjects(e.get("elements"))
+i.set("reshareStart",n)
+return e.get("elements.firstObject")}))},handleMouseEnter:function(e){"VIDEO"===e.shareType&&Ember.set(e,"isShowTooltip",!0)},handleMouseLeave:function(e){Ember.set(e,"isShowTooltip",!1)},changeTabs:function(e){if(i.TABS_NAME_WHITELIST.includes(e)){this._currentTab&&this.get("tracking").fireInteractionEvent("content_analytics_"+e+"_tab")
+this._currentTab=e
+e===i.VIEWS_TAB_NAME?this.transitionTo(this.routeName):this.transitionTo(this.routeName+"."+e)}},onModalClose:function(){if(!this.get("router._routerMicrolib.activeTransition")){var e=this.modelFor("application"),t=e.parentPath
+this[e.modalCloseTransitionMethod](t())}}},_getAnalyticsSections:function(e){for(var t,a={},i=0;i<e.length;i++)a[(t=e.objectAt(i)).get("value.sectionType")]=t
+return a},_getReshareFeed:function(e){var t=this.get("store"),a={q:"reshareFeed",targetUrn:e},i="feed/updates|"+a.q+"|"+e
+return t.queryURL("feed/updatesV2",{cacheKey:i,params:a,reload:!0})},_getCreatedDate:function(e){var t=e.get("header.createdOn.year"),a=e.get("header.createdOn.month")-1,i=e.get("header.createdOn.day")
+return new Date(t,a,i)},_formatDate:function(e){return this.get("formatter").formatDate(e,"fmt_mdy_long")},_getHasAnalyticsExpired:function(e){return Date.now()-e.getTime()>=i.ANALYTICS_EXPIRE_TIME}})
+e.default=d})
+define("me-ca-base/routes/post-analytics",["exports","me-ca-base/routes/content-analytics"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({pageKey:"flagship3_me_post_analytics"})
+e.default=a})
+define("me-ca-base/routes/share-analytics",["exports","me-ca-base/routes/content-analytics"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var a=t.default.extend({pageKey:"flagship3_me_share_analytics"})
+e.default=a})
+define("me-ca-base/templates/application",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"7FTuSuix",block:'{"symbols":[],"statements":[[7,"div"],[11,"id","me-ca"],[9],[0,"\\n  "],[1,[21,"outlet"],false],[0,"\\n"],[10],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"me-ca-base/templates/application.hbs"}})
+e.default=t})
+define("me-ca-base/templates/components/analytics-highlight",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"2Ynb42Ph",block:'{"symbols":["&default"],"statements":[[14,1,[[27,"hash",null,[["type","icon","showInitialView","toggleInitialView","company","primaryHighlight","secondaryHighlight","expandedHighlightArray"],[[23,["type"]],[23,["icon"]],[23,["showInitialView"]],[27,"action",[[22,0,[]],"toggleInitialView"],null],[23,["model","miniCompany"]],[23,["model","highlight"]],[23,["model","secondaryHighlight"]],[23,["expandedHighlightArray"]]]]]]],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"me-ca-base/templates/components/analytics-highlight.hbs"}})
+e.default=t})
+define("me-ca-base/utils/analytics-module",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.onImpression=t
+e.default=e.IMPRESSION_EVENT=void 0
+function t(e){if(this.element){var t,a=this.getImpressionTrackingInfo(e)
+a.body[this.get("impressionEvent.object")]=this.get("socialUpdateModuleType")
+this.get("tracking").fireTrackingPayload(a.eventName,((t={socialUpdate:{objectUrn:this.get("objectUrn"),trackingId:this.get("trackingId")}})[a.objectCollection]=[a.body],t))}}var a={eventName:"SocialUpdateAnalyticsModuleImpressionEvent",objectCollection:"analyticsModules",object:"analyticsModule"}
+e.IMPRESSION_EVENT=a
+var i={IMPRESSION_EVENT:a,onImpression:t,name:"analytics-module"}
+e.default=i})
+define("me-ca-base/utils/constants",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.SUPPORTED_URN_TYPES=e.SUPPORTED_URN_TYPE_MAP=e.SOCIAL_UPDATE_TYPES=e.TABS_NAME_WHITELIST=e.VIEWS_TAB_NAME=e.RESHARES_TAB_NAME=e.LIX=e.ANALYTICS_EXPIRE_TIME=void 0
+e.ANALYTICS_EXPIRE_TIME=63072e6
+e.LIX={}
+e.RESHARES_TAB_NAME="reshares"
+e.VIEWS_TAB_NAME="views"
+var t=["reshares","views"]
+e.TABS_NAME_WHITELIST=t
+e.SOCIAL_UPDATE_TYPES={VIDEO:"VIDEO",POST:"POST",SHARE:"SHARE"}
+var a={article:"article",activity:"activity",linkedInArticle:"linkedInArticle",profilePost:"linkedInArticle",share:"share",ugcPost:"ugcPost"}
+e.SUPPORTED_URN_TYPE_MAP=a
+var i=Object.keys(a)
+e.SUPPORTED_URN_TYPES=i})
+define("me-ca-base/utils/get-update-urn",["exports","urn-utils","me-ca-base/utils/constants"],function(e,t,a){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=function(e){var i=(0,t.extractEntityInfoFromUrn)(e),s=i.type,n=i.id
+if(!n)return e
+if(!a.SUPPORTED_URN_TYPES.includes(s))throw new Error("Unsupported urn type provided to content analytics")
+var r=a.SUPPORTED_URN_TYPE_MAP[s],o=n.split(",")[0]
+return r+":"+o}})
+define("me-ca-base/utils/supported-social-update-type",["exports","me-ca-base/utils/constants"],function(e,t){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.isSupportedSocialUpdateType=function(e){return Object.values(t.SOCIAL_UPDATE_TYPES).indexOf(e)>-1}})
+define("se-me-ca/components/reshare-list",["exports","se-me-ca/templates/components/reshare-list","shared/mixins/infinite-scroll"],function(e,t,a){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var i=Ember.Component.extend(a.default,{layout:t.default,eventTarget:".ca-tabs__reshares",scrollingElementSelector:".ca-tabs__reshares",triggerInfiniteScrollOnInsert:!0,infiniteScroll:function(){var e=this.getProperties("reshareStart","numShares"),t=e.reshareStart
+if(!(t>=e.numShares))return this.get("onGetReshares")(t).then((function(e){return e}))}})
+e.default=i})
+define("se-me-ca/components/social-gesture-highlights",["exports","se-me-ca/templates/components/social-gesture-highlights","me-ca-base/mixins/impression-tracking","me-ca-base/utils/analytics-module"],function(e,t,a,i){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var s=Ember.Component.extend(a.default,{layout:t.default,onImpression:i.onImpression,tagName:"section",classNames:["ca-social-gesture-highlights"],trackImpressions:!0,impressionEvent:i.IMPRESSION_EVENT,socialUpdateModuleType:"HIGHLIGHTS",showInitialView:!0,tracking:Ember.inject.service("tracking"),init:function(){this._super()
+this.showExapndedHighlightsButton=this._determineToShowExpandedHighlightsButton()
+this.get("tracking").setupTrackableComponent(this)},actions:{toggleInitialView:function(){var e=this.get("showInitialView")?"expand":"collapse"
+this.get("tracking").fireInteractionEvent("expanded_highlights_arrow_".concat(e))
+this.toggleProperty("showInitialView")}},_determineToShowExpandedHighlightsButton:function(){for(var e=this.get("highlights"),t=0;t<e.length;t++)if(e.objectAt(t).getWithDefault("value.companyHighlightInfos",[]).length>5||e.objectAt(t).getWithDefault("value.referrerSourcesInfoArray",[]).length>5||e.objectAt(t).getWithDefault("value.occupationHighlightInfos",[]).length>5||e.objectAt(t).getWithDefault("value.regionHighlightInfos",[]).length>5)return!0
+return!1}})
+e.default=s})
+define("se-me-ca/components/tabs-view",["exports","se-me-ca/templates/components/tabs-view","ember-stdlib/utils/is-browser","me-ca-base/utils/constants"],function(e,t,a,i){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var s=["VIDEO"],n=Ember.Component.extend({layout:t.default,router:Ember.inject.service("router"),isShowTooltip:!1,isTooltipAdded:!1,tooltipContainerId:"tooltipContainer-".concat(Ember.guidFor(void 0)),tooltipId:"tooltip-".concat(Ember.guidFor(void 0)),isTooltipType:Ember.computed("shareType",(function(){return-1!==s.indexOf(this.get("shareType"))})),shouldAddTooltip:Ember.computed("isTooltipType","isTooltipAdded",(function(){return this.get("isTooltipType")&&!this.get("isTooltipAdded")})),shouldShowSubHeader:Ember.computed("enableReactions","showNumReactions","showNumLikes","showNumComments",(function(){return this.get("enableReactions")&&this.get("showNumReactions")||this.get("showNumLikes")||this.get("showNumComments")})),_addTooltipListener:function(e){this.addEventListener(e,"mouseenter",this._handleMouseEnter)
+this.addEventListener(e,"mouseleave",this._handleMouseLeave)},_addTooltipComponent:function(e,t){e.appendChild(t)},_handleMouseEnter:function(){this.set("isShowTooltip",!0)},_handleMouseLeave:function(){this.set("isShowTooltip",!1)},selectedTab:Ember.computed("router.currentRouteName",(function(){var e=this.get("router.currentRouteName"),t=this.get("showResharesTab")
+if(!e)return i.VIEWS_TAB_NAME
+var a=e.split(".").slice(-1)[0]
+return t&&i.TABS_NAME_WHITELIST.includes(a)?a:i.VIEWS_TAB_NAME})).readOnly(),init:function(){this._super.apply(this,arguments)},didRender:function(){this._super.apply(this,arguments)
+if(a.default&&this.get("shouldAddTooltip")){var e=document.getElementById(this.get("tooltipContainerId")),t=document.getElementById(this.get("tooltipId"))
+if(e){this._addTooltipListener(e)
+this._addTooltipComponent(e,t)
+this.set("isTooltipAdded",!0)}}}})
+e.default=n})
+define("se-me-ca/templates/components/reshare-list",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"Ka7kS+pa",block:'{"symbols":["reshare"],"statements":[[7,"div"],[11,"class","ca-tabs__reshares feed-container-theme"],[9],[0,"\\n"],[4,"each",[[23,["reshares"]]],null,{"statements":[[0,"    "],[1,[27,"feed-shared@update/generic-update",null,[["model","hideCaEntryPoint"],[[22,1,[]],true]]],false],[0,"\\n"]],"parameters":[1]},null],[0,"\\n"],[4,"if",[[23,["isLoading"]]],null,{"statements":[[0,"    "],[1,[27,"ember-cli-pemberly-artdeco@li-icon",null,[["type","size","class"],["loader","small","blue loader"]]],false],[0,"\\n"]],"parameters":[]},null],[10],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"se-me-ca/templates/components/reshare-list.hbs"}})
+e.default=t})
+define("se-me-ca/templates/components/single-view",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"uxWSmAW4",block:'{"symbols":[],"statements":[[0,"\\n"]],"hasEval":false}',meta:{moduleName:"se-me-ca/templates/components/single-view.hbs"}})
+e.default=t})
+define("se-me-ca/templates/components/social-gesture-highlights",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"hZnCYMMe",block:'{"symbols":["highlight","index","highlight","highlight"],"statements":[[7,"div"],[11,"class","ca-social-gesture-highlights__highlights"],[9],[0,"\\n"],[4,"each",[[23,["highlights"]]],null,{"statements":[[0,"    "],[7,"article"],[11,"class","ca-social-gesture-highlights__carousel-item"],[9],[0,"\\n"],[4,"me-ca-base@analytics-highlight",null,[["model","objectUrn","trackingId","index"],[[22,1,["value"]],[27,"unbound",[[22,1,["objectUrn"]]],null],[27,"unbound",[[22,1,["trackingId"]]],null],[22,2,[]]]],{"statements":[[0,"\\n        "],[7,"header"],[11,"class","ca-analytics-highlight__image-container"],[12,"aria-labelledby",[28,["ca-analytics-highlight__primary-",[22,2,[]]]]],[9],[0,"\\n"],[4,"if",[[22,3,["company"]]],null,{"statements":[[4,"link-to-external",["companies.company",[27,"unbound",[[27,"data-layer@feed/profile-id",[[22,3,["company"]]],null]],null]],[["data-control-name","class"],["analytics_company_logo","ca-analytics-highlight__logo-container ca-analytics-highlight__image"]],{"statements":[[0,"              "],[1,[27,"ember-mpr-images@lazy-image",null,[["image","alt","class","desiredWidth","ghostType"],[[27,"unbound",[[22,3,["company","logo"]]],null],[27,"unbound",[[22,3,["company","name"]]],null],"ca-analytics-highlight__company-logo",100,"company"]]],false],[0,"\\n"]],"parameters":[]},null]],"parameters":[]},{"statements":[[0,"            "],[7,"span"],[11,"class","visually-hidden"],[9],[1,[27,"t",[[22,3,["type"]],"se-me-ca/templates/components/social-gesture-highlights"],null],false],[10],[0,"\\n            "],[7,"span"],[12,"class",[28,["ca-analytics-highlight__icon ca-analytics-highlight__image ",[22,3,["icon"]]]]],[9],[10],[0,"\\n"]],"parameters":[]}],[0,"        "],[10],[0,"\\n        "],[7,"main"],[11,"class","card ca-analytics-highlight__main"],[9],[0,"\\n          "],[7,"section"],[11,"class","ca-analytics-highlight__message"],[9],[0,"\\n            "],[7,"h3"],[12,"id",[28,["ca-analytics-highlight__primary-",[22,2,[]]]]],[11,"class","ca-analytics-highlight__primary-message"],[9],[0,"\\n              "],[1,[27,"data-layer@text/attributed-text-html",[[22,3,["primaryHighlight"]]],null],false],[0,"\\n            "],[10],[0,"\\n            "],[7,"section"],[11,"class","ca-analytics-highlight__info"],[9],[0,"\\n              "],[7,"ul"],[11,"class","ca-analytics-highlight__info-list"],[9],[0,"\\n"],[4,"each",[[27,"shared@get-expanded-highlights",[[22,3,["expandedHighlightArray"]]],[["showInitialView"],[[23,["showInitialView"]]]]]],null,{"statements":[[0,"                  "],[7,"li"],[11,"class","ca-analytics-highlight__info-list-item display-flex justify-space-between t-16 t-black t-normal pt3 pb3 mr2 ml2"],[9],[0,"\\n                    "],[7,"span"],[11,"class","text-align-left"],[9],[0,"\\n"],[4,"if",[[22,4,["miniCompany"]]],null,{"statements":[[0,"                        "],[1,[22,4,["miniCompany","name"]],false],[0,"\\n"]],"parameters":[]},{"statements":[[4,"if",[[22,4,["regionName"]]],null,{"statements":[[0,"                        "],[1,[22,4,["regionName"]],false],[0,"\\n"]],"parameters":[]},{"statements":[[4,"if",[[22,4,["viewerTitle"]]],null,{"statements":[[0,"                        "],[1,[22,4,["viewerTitle"]],false],[0,"\\n"]],"parameters":[]},{"statements":[[4,"if",[[22,4,["referrer"]]],null,{"statements":[[0,"                        "],[1,[22,4,["referrer","text"]],false],[0,"\\n                      "]],"parameters":[]},null]],"parameters":[]}]],"parameters":[]}]],"parameters":[]}],[0,"                    "],[10],[0,"\\n                    "],[7,"span"],[9],[0,"\\n                      "],[1,[27,"ember-cli-pemberly-i18n@format-number",[[22,4,["numViews"]]],null],false],[0,"\\n                    "],[10],[0,"\\n                  "],[10],[0,"\\n"]],"parameters":[4]},null],[0,"              "],[10],[0,"\\n            "],[10],[0,"\\n          "],[10],[0,"\\n        "],[10],[0,"\\n"]],"parameters":[3]},null],[0,"    "],[10],[0,"\\n"]],"parameters":[1,2]},null],[10],[0,"\\n"],[7,"div"],[11,"class","ca-social-gesture-highlights__expand text-align-center"],[9],[0,"\\n"],[4,"if",[[27,"unbound",[[23,["showExapndedHighlightsButton"]]],null]],null,{"statements":[[0,"    "],[7,"button"],[11,"class","ca-social-gesture-highlights__expand-action t-16 t-black t-normal pr2 pl2 pt5"],[12,"aria-expanded",[27,"if",[[23,["showInitialView"]],"false","true"],null]],[3,"action",[[22,0,[]],"toggleInitialView"],[["bubbles"],[false]]],[9],[0,"\\n      "],[1,[27,"t",[[27,"if",[[23,["showInitialView"]],"show_more","show_less"],null],"se-me-ca/templates/components/social-gesture-highlights"],null],false],[0,"\\n      "],[1,[27,"ember-cli-pemberly-artdeco@li-icon",null,[["a11y-text","class","size","type"],[[27,"t",[[27,"if",[[23,["showInitialView"]],"show_more","show_less"],null],"se-me-ca/templates/components/social-gesture-highlights"],null],"ca-social-gesture-highlights__expand-action-icon","large",[27,"if",[[23,["showInitialView"]],"chevron-down-icon","chevron-up-icon"],null]]]],false],[0,"\\n    "],[10],[0,"\\n"]],"parameters":[]},null],[10],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"se-me-ca/templates/components/social-gesture-highlights.hbs"}})
+e.default=t})
+define("se-me-ca/templates/components/tabs-view",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"wlKzTYdq",block:'{"symbols":["modal","tabs","tablist"],"statements":[[0,"\\n"],[4,"artdeco-modal@artdeco-modal",null,[["isOpen","headerId","dismissModal","modalClasses","size"],[true,"content-analytics-modal-label",[23,["onModalClose"]],"content-analytics-modal","x-large"]],{"statements":[[4,"component",[[22,1,["artdeco-modal-header"]]],null,{"statements":[[0,"    "],[7,"div"],[11,"class","ca-activity-header__image-container"],[11,"role","presentation"],[9],[0,"\\n      "],[1,[27,"ember-mpr-images@custom-image",null,[["image"],[[23,["header","image"]]]]],false],[0,"\\n    "],[10],[0,"\\n\\n    "],[7,"button"],[11,"class","ca-activity-header__title-wrapper"],[3,"action",[[22,0,[]],[23,["onNavigateToDetail"]]],[["bubbles"],[false]]],[9],[0,"\\n      "],[7,"h1"],[11,"class","ca-activity-header__title t-20 t-black t-bold fl"],[11,"id","content-analytics-modal-label"],[9],[0,"\\n"],[4,"if",[[23,["header","title"]]],null,{"statements":[[0,"          "],[1,[23,["header","title"]],false],[0,"\\n"]],"parameters":[]},{"statements":[[0,"          "],[1,[27,"t",[[23,["headerTitleTemplateKey"]],"se-me-ca/templates/components/tabs-view"],[["date"],[[23,["createdDate"]]]]],false],[0,"\\n"]],"parameters":[]}],[0,"      "],[10],[0,"\\n\\n"],[4,"if",[[23,["shouldShowSubHeader"]]],null,{"statements":[[0,"        "],[7,"p"],[11,"class","t-20 t-black t-bold p4"],[9],[0,"\\n"],[4,"if",[[23,["enableReactions"]]],null,{"statements":[[4,"if",[[23,["showNumReactions"]]],null,{"statements":[[0,"              "],[7,"span"],[11,"class","ca-activity-header__reactions-count"],[9],[0,"\\n                "],[1,[27,"t",["header_count_reactions","se-me-ca/templates/components/tabs-view"],[["numReactions"],[[23,["numReactions"]]]]],false],[0,"\\n              "],[10],[0,"\\n"]],"parameters":[]},null]],"parameters":[]},{"statements":[[4,"if",[[23,["showNumLikes"]]],null,{"statements":[[0,"            "],[7,"span"],[11,"class","ca-activity-header__likes-count"],[9],[0,"\\n              "],[1,[27,"t",["header_count_likes","se-me-ca/templates/components/tabs-view"],[["numLikes"],[[23,["numReactions"]]]]],false],[0,"\\n            "],[10],[0,"\\n          "]],"parameters":[]},null]],"parameters":[]}],[0,"\\n"],[4,"if",[[23,["showNumComments"]]],null,{"statements":[[0,"            "],[7,"span"],[11,"class","ca-activity-header__comments-count"],[9],[0,"\\n              "],[1,[27,"t",["header_count_comments","se-me-ca/templates/components/tabs-view"],[["numComments"],[[23,["numComments"]]]]],false],[0,"\\n            "],[10],[0,"\\n"]],"parameters":[]},null],[0,"        "],[10],[0,"\\n"]],"parameters":[]},null],[0,"    "],[10],[0,"\\n"]],"parameters":[]},null],[0,"\\n"],[4,"component",[[22,1,["artdeco-modal-content"]]],null,{"statements":[[4,"ember-cli-artdeco-tabs@artdeco-tabs",null,[["class","selection","activeTab"],["ca-activity-header__tabs",[23,["selectedTab"]],[23,["selectedTab"]]]],{"statements":[[4,"component",[[22,2,["tablist"]]],null,{"statements":[[4,"component",[[22,3,["tab"]],"views"],[["on-select","id","class"],[[27,"action",[[22,0,[]],[23,["onChangeTab"]]],null],[23,["tooltipContainerId"]],"ca-activity-header__analytics-tooltip-container ca-activity-header__tablist-views-tab"]],{"statements":[[4,"if",[[27,"global-helpers@eq",[[23,["header","socialUpdateType"]],"POST"],null]],null,{"statements":[[0,"            "],[1,[27,"t",["header_count_type_views","se-me-ca/templates/components/tabs-view"],[["numViews","shareType"],[[23,["numViews"]],[23,["header","socialUpdateType"]]]]],false],[0,"\\n"]],"parameters":[]},{"statements":[[0,"            "],[1,[27,"t",["header_count_views","se-me-ca/templates/components/tabs-view"],[["numViews"],[[23,["numViews"]]]]],false],[0,"\\n"]],"parameters":[]}]],"parameters":[]},null],[4,"if",[[23,["showResharesTab"]]],null,{"statements":[[4,"component",[[22,3,["tab"]],"reshares"],[["on-select","class"],[[27,"action",[[22,0,[]],[23,["onChangeTab"]]],null],"ca-activity-header__tablist-reshares-tab"]],{"statements":[[0,"            "],[1,[27,"t",["header_count_reshares","se-me-ca/templates/components/tabs-view"],[["numShares"],[[23,["numShares"]]]]],false],[0,"\\n"]],"parameters":[]},null]],"parameters":[]},null]],"parameters":[3]},null],[0,"\\n"],[4,"component",[[22,2,["tabpanel"]],"views"],null,{"statements":[[4,"if",[[23,["shouldShowSocialGestureHighlights"]]],null,{"statements":[[0,"          "],[1,[27,"se-me-ca@social-gesture-highlights",null,[["highlights","contentType","index","objectUrn","trackingId"],[[23,["socialGestureHighlights","value","highlights"]],[23,["header","socialUpdateType"]],0,[23,["socialGestureHighlights","objectUrn"]],[23,["socialGestureHighlights","trackingId"]]]]],false],[0,"\\n"]],"parameters":[]},null],[0,"\\n"],[4,"if",[[23,["emptyAnalyticsExpirationMessage"]]],null,{"statements":[[0,"          "],[7,"h2"],[11,"class","ca-activity-header__null-analytics-title t-16 t-black--light t-normal"],[9],[0,"\\n            "],[1,[27,"rich-text@attributed-text",null,[["attributedText"],[[23,["emptyAnalyticsExpirationMessage"]]]]],false],[0,"\\n          "],[10],[0,"\\n"]],"parameters":[]},{"statements":[[4,"if",[[23,["hasAnalyticsExpired"]]],null,{"statements":[[0,"          "],[7,"h2"],[11,"class","ca-activity-header__null-analytics-title t-16 t-black--light t-normal"],[9],[0,"\\n            "],[1,[27,"t",["analytics_expired","se-me-ca/templates/components/tabs-view"],null],false],[0,"\\n          "],[10],[0,"\\n"]],"parameters":[]},{"statements":[[4,"if",[[23,["hasNoAnalytics"]]],null,{"statements":[[0,"          "],[7,"h2"],[11,"class","ca-activity-header__null-analytics-title t-16 t-black--light t-normal"],[9],[0,"\\n            "],[1,[27,"t",["analytics_not_available","se-me-ca/templates/components/tabs-view"],null],false],[0,"\\n          "],[10],[0,"\\n        "]],"parameters":[]},null]],"parameters":[]}]],"parameters":[]}],[0,"\\n"]],"parameters":[]},null],[4,"if",[[23,["showResharesTab"]]],null,{"statements":[[4,"component",[[22,2,["tabpanel"]],"reshares"],null,{"statements":[[0,"          "],[1,[27,"se-me-ca@reshare-list",null,[["reshares","reshareStart","numShares","onGetReshares"],[[23,["reshares"]],[23,["reshareStart"]],[23,["numShares"]],[23,["onGetReshares"]]]]],false],[0,"\\n"]],"parameters":[]},null]],"parameters":[]},null],[0,"\\n"]],"parameters":[2]},null],[0,"\\n"],[4,"if",[[23,["isTooltipType"]]],null,{"statements":[[0,"      "],[7,"div"],[12,"class",[28,["tooltip-inverse ca-activity-header__video-analytics-tooltip ",[27,"if",[[23,["isShowTooltip"]],"active"],null]]]],[11,"role","tooltip"],[12,"id",[21,"tooltipId"]],[9],[0,"\\n        "],[7,"span"],[9],[1,[27,"t",["views_on_your_video_tooltip","se-me-ca/templates/components/tabs-view"],null],false],[10],[0,"\\n      "],[10],[0,"\\n"]],"parameters":[]},null]],"parameters":[]},null]],"parameters":[1]},null]],"hasEval":false}',meta:{moduleName:"se-me-ca/templates/components/tabs-view.hbs"}})
+e.default=t})
+define("se-me-ca/templates/content-analytics",["exports"],function(e){"use strict"
+Object.defineProperty(e,"__esModule",{value:!0})
+e.default=void 0
+var t=Ember.HTMLBars.template({id:"9r7R5qtY",block:'{"symbols":[],"statements":[[7,"div"],[11,"id","content-analytics"],[11,"class","ca-content-analytics"],[9],[0,"\\n  "],[1,[27,"se-me-ca@tabs-view",null,[["activeTab","createdDate","hasAnalytics","hasNoAnalytics","hasAnalyticsExpired","emptyAnalyticsExpirationMessage","shouldShowSocialGestureHighlights","header","headerTitleTemplateKey","reshares","reshareStart","shareType","showNumComments","showNumLikes","showNumReactions","showResharesTab","socialGestureHighlights","numComments","numLikes","numShares","numViews","numReactions","enableReactions","onModalClose","onFireTabControlEvent","onGetReshares","onNavigateToDetail","onChangeTab"],[[23,["model","activeTab"]],[23,["model","createdDate"]],[23,["model","hasAnalytics"]],[23,["model","hasNoAnalytics"]],[23,["model","hasAnalyticsExpired"]],[23,["model","emptyAnalyticsExpirationMessage"]],[23,["model","shouldShowSocialGestureHighlights"]],[23,["model","header"]],[23,["model","headerTitleTemplateKey"]],[23,["model","reshares","elements"]],[23,["model","reshareStart"]],[23,["model","shareType"]],[23,["model","showNumComments"]],[23,["model","showNumLikes"]],[23,["model","showNumReactions"]],[23,["model","showNumShares"]],[23,["model","socialGestureHighlights"]],[23,["model","numComments"]],[23,["model","numLikes"]],[23,["model","numShares"]],[23,["model","numViews"]],[23,["model","numReactions"]],[23,["model","enableReactions"]],[27,"ember-route-action-helper@route-action",["onModalClose"],null],[27,"ember-route-action-helper@route-action",["fireTabControlEvent"],null],[27,"ember-route-action-helper@route-action",["getReshares"],null],[27,"ember-route-action-helper@route-action",["navigateToDetail"],null],[27,"ember-route-action-helper@route-action",["changeTabs"],null]]]],false],[0,"\\n"],[10],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"se-me-ca/templates/content-analytics.hbs"}})
+e.default=t})
+
+//# sourceMappingURL=engine-vendor.map
