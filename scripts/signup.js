@@ -8,5 +8,5 @@ function signup(){
  localStorage.setItem('firstName', firstName);
  localStorage.setItem('lastName', lastName);
  localStorage.setItem(firstName+'email', email);
- localStorage.setItem(last+'password', password);
+ localStorage.setItem(firstName+'password', password);
 }
