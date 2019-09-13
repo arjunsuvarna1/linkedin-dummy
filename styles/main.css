@@ -2,13 +2,8 @@
 /* signup page */
 
 
-body{
-    background-color :#a2cadd;
-}
-
-/* signup form css */
-.signup{
-    background-color:rgb(238, 235, 235);
+#singup_body_background{
+    background-color : #0e76a8;
 }
 
 /* linked logo */
@@ -16,11 +11,67 @@ body{
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width : 30%;
-    
+    width : 20%;
+    height: 50px;
+    margin-top : 10px;
+    margin-bottom: 10px;
   }
 
 div #signup_text{
     text-align: center;
     color : white;
+    margin-bottom: 20px;
+    margin-top : 20px;
+    
 }
+
+/* signup form css */
+.form .signup{
+    background-color:rgb(238, 235, 235);
+    width: 35%;
+    margin:0 auto;
+}
+/*signup form input fields*/
+.form .signup .form-control {
+    width: 80%;
+    margin: 0 auto;
+}
+
+/*signup form label fields */
+.form .signup .label{
+    margin-left: 10%;
+    color :rgb(66, 65, 65);
+    padding-top: 10px;
+    margin-bottom : 0;
+}
+
+/*signup form text*/
+#agree_info{
+    padding-left : 10%;
+    padding-right : 10%;
+    text-align : center;
+    padding-top : 10px;
+    padding-bottom: 10px;
+}
+
+/*submit button css in signup form */
+#submit_btn{
+    width: 80%;
+    margin : 0 auto;
+    margin-bottom: 10px;
+    background-color : blue;
+    font-weight: bold;
+}
+
+div .copyright{
+    text-align: center;
+    color : rgb(231, 224, 224);
+}
+
+
+
+
+
+
+
+
