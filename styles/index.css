@@ -1,20 +1,20 @@
 .mainNav{
     position: relative;
     width: 100%;
-    max-width: calc(1128px + (16px * 2));
+    
     padding-left: 16px;
     padding-right: 16px;
     margin: auto;
 }
 .logo{
     position: absolute;
-    left: 228px;
-    width: 122px;
-    height: 55px;
-    top: -2px;
+    
+    left: 210px;
+    width: 125px;
+    height: 46px;
+    top: 6px;
 }
 .signIn{
-
    float: right;
     border-radius: 2px;
     -webkit-box-sizing: border-box;
@@ -45,11 +45,16 @@
     margin-right: 10px;
 }
 .homePage{
-    height: 240px;
-    width: 400px;
+    height: 551px;
+    width: 717px;
     position: absolute;
-    bottom: calc(-64px);
-    left: 0;
+    right:50px;
+    top:179px;
 }
 .form-control {width:190px;}
 .popover {max-width:280px;}
+.fonth3{
+    color: #2977c9;
+    font-weight: 200;
+    line-height: 80px;
+}
