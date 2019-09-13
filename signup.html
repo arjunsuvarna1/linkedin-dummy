@@ -10,17 +10,48 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="scripts/signup.js"></script>
+    <script src="singup.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
+
 <body>
 
+<!-- Linked Logo -->
+<div id="image">
+        <img src="images/linkedin_signup.svg" alt="linked_logo">
+    </div>
 
-    <form action="">
-        First Name :<input type="text" id="firstName" ><br>
-        last Name :<input type="text" id="lastName" ><br>
-        email : <input type='email' id="email"><br>
-        password : <input type="password" id="password"><br>
-        <button type="submit" onclick="signup()">Submit</button>
-    </form>
+    <div class="container">
+
+        
+
+
+        <form action="">
+            <div class="form-group">
+                <label for="firstName">First Name :</label>
+                <input type="text" id="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name :</label>
+                <input type="text" id="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail : </label>
+                <input type='email' id="email" required>
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">Password (6 or more characters) :</label>
+                <input type="password" id="password" minlength="6" required>
+            </div>
+
+            <button type="submit" onclick="signup()">Submit</button>
+        </form>
+
+    </div>
 </body>
+
 </html>
